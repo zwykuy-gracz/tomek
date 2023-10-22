@@ -39,6 +39,9 @@ for i in set1:
     if i in set2:
         common_part.add(i)
 # print(common_part)
+intersection_1 = set1 & set2
+intersection_2  = set1.intersection(set2)
+print(intersection_2)
 
 # Zagnieżdżone Słowniki:
 # Stwórz zagnieżdżony słownik, który reprezentuje katalog książek. Każda książka powinna mieć

@@ -1,3 +1,7 @@
+from abc import ABC, abstractmethod
+from collections import deque
+import math
+import random
 # Zadanie: Tworzenie Klasy Osoby
 # Stwórz klasę o nazwie Person, która reprezentuje osobę. Klasa ta powinna mieć następujące 
 # atrybuty:
@@ -40,7 +44,7 @@ class Person:
 
 class Student(Person):
     def __init__(self, name, age, student_id):
-        Person.__init__(self, name, age)
+        super().__init__(name, age)
         self.student_id = student_id
         print(f"Initialized student with id {self.student_id}")
 
@@ -51,7 +55,54 @@ class Student(Person):
 # Stwórz abstrakcyjną klasę AbstractQueue z metodami abstrakcyjnymi enqueue(self, item) i 
 # dequeue(self). Następnie utwórz konkretne implementacje kolejki, np. QueueFIFO (kolejka typu 
 # FIFO - "First-In-First-Out") i QueueLIFO (kolejka typu LIFO - "Last-In-First-Out"), które dziedziczą
-# po AbstractQueue i zaimplementuj odpowiednie metody. #TODO
+# po AbstractQueue i zaimplementuj odpowiednie metody.
+
+class AbstractQueue(ABC):
+    def __init__(self) -> None:
+        super().__init__()
+        self._elemenents: deque = deque()
+
+    @abstractmethod
+    def add_element(self, item):
+        pass
+
+    @abstractmethod
+    def get_next_element(self):
+        pass
+
+class QueueFIFO(AbstractQueue):
+    def __init__(self):
+        super().__init__()
+
+    def add_element(self, item):
+        self._elemenents.append(item)
+    
+    def get_next_element(self):
+        if len(self._elemenents) > 0:
+            return self._elemenents.popleft()
+        else:
+            raise IndexError('Queue is empty!')
+
+class Stack(AbstractQueue):
+    def __init__(self):
+        super().__init__()
+
+    def add_element(self, item):
+        self._elemenents.append(item)
+    
+    def get_next_element(self):
+        if len(self._elemenents) > 0:
+            return self._elemenents.pop()
+        else:
+            raise IndexError('Stack is empty!')
+
+# q = QueueFIFO()
+# q.add_element(1)
+# q.add_element(2)
+# q.add_element(3)
+# print(q.get_next_element())
+# print(q.get_next_element())
+# print(q.get_next_element())
 
 # Stwórz klasę BankAccount, która ma atrybuty account_number, owner_name i balance. Dodaj 
 # metody do wpłaty i wypłaty środków. Napisz też metodę __str__, która zwraca czytelny opis 
@@ -86,24 +137,31 @@ class BankAccount:
 # powierzchni danej figury geometrycznej. Następnie stwórz dwie konkretne implementacje: Circle 
 # (koło) i Rectangle (prostokąt) oraz zaimplementuj ich metody area
 
-from abc import ABC
-class Shape(ABC): 
+class Shape(ABC):
+    @abstractmethod
     def area(self): 
         pass
   
-class Circle(Shape): 
-    def area(self, r): 
-        return 3.14 * r * r
+class Circle(Shape):
+    def __init__(self, r):
+        self.r = r
+
+    def area(self): 
+        return math.pi * self.r**2
   
-class Rectangle(Shape): 
-    def area(self, a, b): 
-        return a * b
+class Rectangle(Shape):
+    def __init__(self, w, h):
+        self.w = w
+        self.h = h
 
-# c = Circle()
-# print(c.area(2))
+    def area(self): 
+        return self.w * self.h
 
-# r = Rectangle()
-# print(r.area(2, 3))
+# c = Circle(2)
+# print(c.area())
+
+# r = Rectangle(2, 3)
+# print(r.area())
 
 # Stwórz klasę EventList, która reprezentuje listę wydarzeń. Klasa ta powinna mieć atrybut events 
 # jako listę, a także metody do dodawania (add_event(self, event)) i usuwania (remove_event(self, 
@@ -135,9 +193,49 @@ class EventList:
 # (kolor). Następnie stwórz klasę Deck, która reprezentuje talie kart. Klasa Deck powinna mieć
 # metody do tasowania (shuffle(self)) i rozdawania (deal(self)) kart
 
-# class Card:
-#     def __init__(self):
-#         pass #TODO
+class Card:
+    def __init__(self, rank, suit):
+         self.rank = rank
+         self.suit = suit
+
+    def __str__(self):
+        return f"{self.rank} of {self.suit}"
+
+class Deck:
+    def __init__(self):
+        ranks = [
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "Jack",
+            "Queen",
+            "King",
+            "Ace",
+        ]
+        suits = ["Hearts", "Diamonds", "Clubs", "Spades"]
+        self.cards = [Card(rank, suit) for rank in ranks for suit in suits]
+
+    def shuffle(self):
+        random.shuffle(self.cards)
+
+    def deal(self):
+        print(len(self.cards))
+        for i, k in enumerate(self.cards):
+            if len(self.cards) > 0:
+                print(i, len(self.cards), self.cards.pop())
+            else:
+                return "End of cards"
+
+# d = Deck()
+# d.shuffle()
+# d.deal()
+# print(d.deal())
 
 # Stwórz klasę Task, która reprezentuje zadanie do wykonania. Zadanie powinno mieć atrybuty 
 # description (opis) i completed (czy zostało zakończone). Następnie stwórz klasę TaskList, która 
@@ -146,16 +244,23 @@ class EventList:
 # task))
 
 class Task:
-    description = ''
-    completed = False
+    def __init__(self, description):
+        description = ''
+        completed = False
+
+    def __str__(self):
+        status = "Completed" if self.completed else "Not Completed"
+        return f"Task: {self.description}, Status: {status}"
+
+    def complete(self):
+        self.completed = True
 
 class TaskList(Task):
     def __init__(self):
         self.tasks = []
 
     def add_task(self, task):
-        self.description = task
-        self.tasks.append(self.description)
+        self.tasks.append(task)
 
     def remove_task(self, task):
         if task in self.tasks:
@@ -164,20 +269,75 @@ class TaskList(Task):
             print("no such task")
     
     def complete_task(self, task):
-        self.completed = True
+        if task in self.tasks:
+            task.complete()
+            print(f"Task: {task.description} complited")
+        else:
+            print("no such task")
+
+    def display_tasks(self):
+        for task in self.tasks:
+            print(task)
 
 # t = TaskList()
 # t.add_task('coffee')
+# t.add_task('tea')
 # print(t.tasks)
-# print(t.completed)
-# t.complete_task('coffee')
-# print(t.completed)
+# # print(t) #TODO
+# t.complete_task('tea')
+# t.complete_task()
+# t.display_tasks()
 
 # Stwórz klasę Ticket, która reprezentuje bilet na wydarzenie. Bilet powinien mieć atrybuty, takie jak 
 # event_name, ticket_price, quantity, itp. Następnie stwórz klasę TicketBookingSystem, która 
 # będzie zarządzać rezerwacją biletów. Klasa ta powinna mieć metody do rezerwacji 
 # (reserve_ticket(self, ticket, quantity)), odwołania rezerwacji (cancel_reservation(self, ticket, 
-# quantity)), i wyświetlania dostępnych biletów (display_available_tickets(self)) #TODO
+# quantity)), i wyświetlania dostępnych biletów (display_available_tickets(self))
+
+class Ticket:
+    def __init__(self, event_name, ticket_price, quantity):
+        self.event_name = event_name
+        self.ticket_price = ticket_price
+        self.quantity = quantity
+
+    def __str__(self):
+        return f"Event: {self.event_name}, Price: {self.ticket_price}, Available Tickets: {self.quantity}"
+
+class TicketBookingSystem:
+    def __init__(self):
+        self.tickets = []
+
+    def add_ticket(self, event_name, ticket_price, quantity):
+        ticket = Ticket(event_name, ticket_price, quantity)
+        self.tickets.append(ticket)
+
+    def reserve_ticket(self, event_name, quantity):
+        for ticket in self.tickets:
+            if ticket.event_name == event_name and ticket.quantity >= quantity:
+                ticket.quantity -= quantity
+                print(f"Successfully reserved {quantity} tickets for '{event_name}'.")
+                return
+        print(f"Sorry, no available tickets for '{event_name}'.")
+
+    def cancel_reservation(self, event_name, quantity):
+        for ticket in self.tickets:
+            if ticket.event_name == event_name:
+                ticket.quantity += quantity
+                print(
+                    f"Canceled reservation for {quantity} tickets for '{event_name}'."
+                )
+                return
+        print(f"No reservation found for '{event_name}'.")
+
+    def display_available_tickets(self):
+        for ticket in self.tickets:
+            print(ticket)
+    
+# t = TicketBookingSystem()
+# t.add_ticket('name1', 123, 43)
+# t.add_ticket('name2', 12, 431)
+# t.reserve_ticket('name1', 43)
+# t.display_available_tickets()
 
 # twórz abstrakcyjną klasę Vehicle z atrybutem name oraz metodą abstrakcyjną start(). Następnie 
 # stwórz dwie klasy dziedziczące po Vehicle: Car i Motorcycle. Klasa Car powinna implementować
@@ -185,7 +345,10 @@ class TaskList(Task):
 # implementować metodę start() tak, aby wypisywała "Motocykl rusza".
 
 class Vehicle(ABC):
-    name = ''
+    def __init__(self, name):
+        self.name = name
+
+    @abstractmethod
     def start(self):
         pass
 
@@ -231,18 +394,37 @@ class Cat(Animal):
 # obrażenia graczowi.
 
 class Character:
-    name = ''
-    health = 10
-    def attack(self):
+    def __init__(self, name, health):
+        self.name = name
+        self.health = health
+    
+    @abstractmethod
+    def attack(self, target):
         pass
 
 class Player(Character):
-    def __init__(self, name):
-        self.name = name
+    def __init__(self, name, health, damage):
+        super().__init__(name, health)
+        self.damage = damage
 
-    def attack(self):
-        pass
-#TODO
+    def attack(self, enemy):
+        enemy.health -= self.damage
+        print(f"{self.name} attacks {enemy.name} and deals {self.damage} damage.")
+
+class Enemy(Character):
+    def __init__(self, name, health, damage):
+        super().__init__(name, health)
+        self.damage = damage
+
+    def attack(self, player):
+        player.health -= self.damage
+        print(f"{self.name} attacks {player.name} and deals {self.damage} damage.")
+
+p = Player('p1', 10, 2)
+e = Enemy('e1', 12, 3)
+print(e.health)
+p.attack(e)
+print(e.health)
 
 # Stwórz abstrakcyjną klasę Shape3D z atrybutem name oraz metodą abstrakcyjną volume(), która 
 # będzie obliczać objętość danego kształtu 3D. Następnie stwórz dwie klasy dziedziczące po 
@@ -257,13 +439,13 @@ class Shape3D:
 
 class Sphere(Shape3D):
     def volume(self, radius):
-        return 4/3 * 3.14 * radius**3
+        return 4/3 * math.pi * radius**3
 
 class Cuboid(Shape3D):
     def volume(self, l, w, h):
         return l * w * h
 
-s = Sphere()
-print(s.volume(2))
-c = Cuboid()
-print(c.volume(2,3,4))
+# s = Sphere()
+# print(s.volume(2))
+# c = Cuboid()
+# print(c.volume(2,3,4))
